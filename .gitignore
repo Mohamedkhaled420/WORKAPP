@@ -1,0 +1,26 @@
+# dependencies
+node_modules
+
+# Next.js
+.next
+out
+
+# production builds
+build
+dist
+
+# misc
+.DS_Store
+*.log
+
+# local env files
+.env
+.env.*
+!.env.example
+
+# vercel
+.vercel
+
+# supabase local
+supabase/.temp
+supabase/.branches
