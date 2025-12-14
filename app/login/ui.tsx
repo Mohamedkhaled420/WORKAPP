@@ -42,6 +42,39 @@ export function LoginForm() {
         });
       }}
     >
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={async () => {
+          setStatus(null);
+
+          try {
+            const supabase = createSupabaseBrowserClient();
+            const { error } = await supabase.auth.signInWithOAuth({
+              provider: "google",
+              options: {
+                redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+              },
+            });
+
+            if (error) {
+              setStatus(error.message);
+            }
+          } catch (err) {
+            setStatus(err instanceof Error ? err.message : "Google sign-in failed.");
+          }
+        }}
+      >
+        Continue with Google
+      </Button>
+
+      <div className="flex items-center gap-3 py-1">
+        <div className="h-px flex-1 bg-border" />
+        <div className="text-xs font-medium text-muted-foreground">or</div>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+
       <Input
         type="email"
         placeholder="you@company.com"

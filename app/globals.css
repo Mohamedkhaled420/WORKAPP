@@ -1,35 +1,39 @@
 @import "tailwindcss";
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
+  --background: 60 20% 99%;
+  --foreground: 200 35% 20%;
 
   --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
+  --card-foreground: 200 35% 20%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
+  --popover-foreground: 200 35% 20%;
 
-  --primary: 240 5.9% 10%;
+  --primary: 184 65% 35%;
   --primary-foreground: 0 0% 98%;
 
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
+  --secondary: 60 10% 95%;
+  --secondary-foreground: 200 35% 20%;
 
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
+  --muted: 60 10% 95%;
+  --muted-foreground: 215 10% 45%;
 
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
+  --accent: 60 10% 96%;
+  --accent-foreground: 200 35% 20%;
 
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 240 5% 64.9%;
+  --border: 60 10% 90%;
+  --input: 60 10% 90%;
+  --ring: 184 65% 35%;
 
-  --radius: 0.75rem;
+  --radius: 1rem;
+
+  --glass-blur: 40px;
+  --glass-opacity: 0.78;
+  --glass-border: 0 0% 100% / 0.22;
 }
 
 @theme inline {
@@ -64,33 +68,35 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: 240 10% 3.9%;
+    --background: 200 20% 8%;
     --foreground: 0 0% 98%;
 
-    --card: 240 10% 3.9%;
+    --card: 200 20% 10%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 10% 3.9%;
+    --popover: 200 20% 10%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
+    --primary: 184 65% 45%;
+    --primary-foreground: 200 20% 10%;
 
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 200 18% 14%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 200 18% 14%;
+    --muted-foreground: 215 12% 70%;
 
-    --accent: 240 3.7% 15.9%;
+    --accent: 200 18% 14%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 200 18% 14%;
+    --input: 200 18% 14%;
+    --ring: 184 65% 45%;
+
+    --glass-border: 0 0% 100% / 0.16;
   }
 }
 
@@ -101,5 +107,14 @@
 
   body {
     @apply bg-background text-foreground font-sans;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: hsl(var(--card) / var(--glass-opacity));
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: 0 10px 30px hsl(0 0% 0% / 0.06);
   }
 }

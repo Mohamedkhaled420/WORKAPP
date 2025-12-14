@@ -144,7 +144,7 @@ export function NoteEditor({
             startSaving(async () => {
               const res = await updateNote(noteId, {
                 title: title.trim() || "Untitled",
-                content: editor.getJSON(),
+                content: editor.getHTML(),
               });
 
               if (!res.ok) {

@@ -18,7 +18,7 @@ export default async function LearningPathsPage() {
             Set Supabase env vars to enable learning paths.
           </div>
           <Button variant="outline" asChild>
-            <Link href="/dashboard">Back to dashboard</Link>
+            <Link href="/">Back home</Link>
           </Button>
         </main>
       </div>
@@ -41,7 +41,7 @@ export default async function LearningPathsPage() {
               <Link href="/login">Sign in</Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/dashboard">Back</Link>
+              <Link href="/">Back</Link>
             </Button>
           </div>
         </main>
@@ -51,31 +51,33 @@ export default async function LearningPathsPage() {
 
   const { data: paths } = await supabase
     .from("learning_paths")
-    .select("id,title,goal,created_at")
+    .select("id,path_name,created_at")
     .eq("user_id", auth.user.id)
     .order("created_at", { ascending: false });
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="mx-auto flex w-full max-w-4xl flex-col gap-10 px-6 py-24">
+      <main className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-6 py-16">
         <header className="flex flex-wrap items-start justify-between gap-6">
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground">Learning OS</p>
             <h1 className="text-3xl font-semibold tracking-tight">Learning paths</h1>
             <p className="text-sm text-muted-foreground">
-              Generate a curriculum, then click into modules and lessons.
+              Curated LinkedIn Learning courses matched to your MBTI + TKI.
             </p>
           </div>
-          <Button variant="outline" asChild>
-            <Link href="/dashboard">Dashboard</Link>
-          </Button>
+          <div className="flex gap-3">
+            <Button variant="outline" asChild>
+              <Link href="/dashboard">Dashboard</Link>
+            </Button>
+          </div>
         </header>
 
         <Card>
           <CardHeader>
-            <CardTitle>Generate a new path</CardTitle>
+            <CardTitle>Create a new path</CardTitle>
             <CardDescription>
-              Uses the Vercel AI SDK when an API key is present.
+              Optional focus area. Course selection uses your saved profile.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -93,8 +95,10 @@ export default async function LearningPathsPage() {
                   href={`/learning-paths/${p.id}`}
                   className="rounded-lg border bg-card p-4 transition-colors hover:bg-muted/40"
                 >
-                  <div className="text-sm font-medium">{p.title ?? p.goal}</div>
-                  <div className="text-xs text-muted-foreground">{p.goal}</div>
+                  <div className="text-sm font-medium">{p.path_name ?? "Untitled"}</div>
+                  <div className="text-xs text-muted-foreground">
+                    Created {new Date(p.created_at).toLocaleDateString()}
+                  </div>
                 </Link>
               ))
             ) : (

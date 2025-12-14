@@ -10,7 +10,7 @@ import { createLearningPath } from "./actions";
 
 export function NewLearningPathForm() {
   const router = useRouter();
-  const [goal, setGoal] = useState("");
+  const [focus, setFocus] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -22,7 +22,7 @@ export function NewLearningPathForm() {
         setError(null);
 
         startTransition(async () => {
-          const res = await createLearningPath(goal);
+          const res = await createLearningPath(focus);
           if (!res.ok) {
             setError(res.error);
             return;
@@ -34,11 +34,11 @@ export function NewLearningPathForm() {
       }}
     >
       <Input
-        placeholder='e.g., "Learn Python for Data Analysis"'
-        value={goal}
-        onChange={(e) => setGoal(e.target.value)}
+        placeholder='Optional focus (e.g., "Data Analysis")'
+        value={focus}
+        onChange={(e) => setFocus(e.target.value)}
       />
-      <Button type="submit" disabled={isPending || !goal.trim()}>
+      <Button type="submit" disabled={isPending}>
         Generate
       </Button>
       {error ? (

@@ -2,11 +2,21 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { LearningPath } from "@/lib/ai/learning-path";
 
 export const dynamic = "force-dynamic";
+
+type LearningPathCourse = {
+  id: string;
+  title: string;
+  order: number;
+  status: "not_started" | "started" | "completed";
+  source_url: string;
+  duration_weeks: number | null;
+  difficulty_level: string | null;
+  whyForYou?: string | null;
+};
 
 export default async function LearningPathDetailPage({
   params,
@@ -17,33 +27,33 @@ export default async function LearningPathDetailPage({
     notFound();
   }
 
-  const { id } = params;
-
   const supabase = await createSupabaseServerClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) notFound();
 
   const { data: row } = await supabase
     .from("learning_paths")
-    .select("id,title,goal,curriculum")
-    .eq("id", id)
+    .select("id,path_name,description,courses")
+    .eq("id", params.id)
     .eq("user_id", auth.user.id)
     .maybeSingle();
 
   if (!row) notFound();
 
-  const curriculum = row.curriculum as unknown as LearningPath;
+  const courses = (row.courses as unknown as LearningPathCourse[]) ?? [];
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-6 py-24">
+      <main className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-6 py-16">
         <header className="flex flex-wrap items-start justify-between gap-6">
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground">Learning path</p>
             <h1 className="text-3xl font-semibold tracking-tight">
-              {row.title ?? row.goal}
+              {row.path_name ?? "Learning path"}
             </h1>
-            <p className="text-sm text-muted-foreground">{row.goal}</p>
+            {row.description ? (
+              <p className="text-sm text-muted-foreground">{row.description}</p>
+            ) : null}
           </div>
 
           <div className="flex gap-3">
@@ -56,41 +66,49 @@ export default async function LearningPathDetailPage({
           </div>
         </header>
 
-        <section className="grid gap-4 lg:grid-cols-3">
-          {curriculum.modules.map((m, idx) => (
-            <Card key={`${m.title}-${idx}`} className="h-full">
-              <CardHeader>
-                <CardTitle className="text-base">{m.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{m.summary}</p>
+        <section className="grid gap-4 md:grid-cols-2">
+          {courses.length ? (
+            courses
+              .sort((a, b) => a.order - b.order)
+              .map((course) => (
+                <Card key={course.id}>
+                  <CardHeader>
+                    <CardTitle className="text-base">
+                      {course.order}. {course.title}
+                    </CardTitle>
+                    <CardDescription>
+                      {course.difficulty_level ?? "—"}
+                      {course.duration_weeks
+                        ? ` · ${course.duration_weeks}w`
+                        : ""}
+                      {course.status ? ` · ${course.status}` : ""}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {course.whyForYou ? (
+                      <div className="rounded-lg border bg-muted/30 p-3 text-sm text-muted-foreground">
+                        {course.whyForYou}
+                      </div>
+                    ) : null}
 
-                <div className="space-y-3">
-                  {m.lessons.map((l, lessonIdx) => (
-                    <div
-                      key={`${l.title}-${lessonIdx}`}
-                      className="rounded-lg border bg-muted/30 p-3"
-                    >
-                      <div className="text-sm font-medium">{l.title}</div>
-                      <div className="mt-1 text-xs text-muted-foreground">
-                        {l.summary}
-                      </div>
-                      <div className="mt-3 space-y-2">
-                        <div className="text-xs font-medium text-muted-foreground">
-                          Quiz
-                        </div>
-                        <ul className="list-inside list-disc space-y-1 text-xs text-muted-foreground">
-                          {l.quiz.map((q, qIdx) => (
-                            <li key={`${q.question}-${qIdx}`}>{q.question}</li>
-                          ))}
-                        </ul>
-                      </div>
+                    <div className="flex flex-wrap gap-3">
+                      <Button asChild>
+                        <a href={course.source_url} target="_blank" rel="noreferrer">
+                          Open on LinkedIn Learning
+                        </a>
+                      </Button>
+                      <Button variant="outline" asChild>
+                        <Link href="/notes">Take notes</Link>
+                      </Button>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </CardContent>
+                </Card>
+              ))
+          ) : (
+            <div className="rounded-lg border bg-card p-6 text-sm text-muted-foreground">
+              This path has no courses yet.
+            </div>
+          )}
         </section>
       </main>
     </div>

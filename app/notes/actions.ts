@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { awardPoints, maybeAwardNoteMaster, POINTS } from "@/lib/gamification";
 
 export async function createNote() {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
@@ -18,7 +19,7 @@ export async function createNote() {
 
   const { data: row, error } = await supabase
     .from("notes")
-    .insert({ user_id: auth.user.id, title: "Untitled", content: {} })
+    .insert({ user_id: auth.user.id, title: "Untitled", content: "" })
     .select("id")
     .single();
 
@@ -26,12 +27,15 @@ export async function createNote() {
     redirect("/notes?error=note_create_failed");
   }
 
+  await awardPoints(supabase, auth.user.id, POINTS.NOTE_CREATED);
+  await maybeAwardNoteMaster(supabase, auth.user.id);
+
   redirect(`/notes/${row.id}`);
 }
 
 export async function updateNote(
   noteId: string,
-  payload: { title: string; content: unknown },
+  payload: { title: string; content: string },
 ) {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     return { ok: false as const, error: "Supabase env vars are not set." };

@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { transformText, type AiTransformAction } from "@/lib/ai/transform";
 import { dominantTkiModesFromUserRow } from "@/lib/psychometrics";
 import type { TkiMode } from "@/lib/tki";
+import { awardPoints, POINTS } from "@/lib/gamification";
 
 export const runtime = "nodejs";
 
@@ -35,18 +36,16 @@ export async function POST(req: Request) {
       if (auth.user) {
         const { data: userRow } = await supabase
           .from("users")
-          .select(
-            "mbti_type,tki_competing,tki_collaborating,tki_compromising,tki_avoiding,tki_accommodating",
-          )
+          .select("mbti_type,tki_scores,tki_dominant_mode")
           .eq("id", auth.user.id)
           .maybeSingle();
 
         profile = {
           mbtiType: userRow?.mbti_type ?? undefined,
-          tkiDominantModes: userRow
-            ? dominantTkiModesFromUserRow(userRow)
-            : null,
+          tkiDominantModes: userRow ? dominantTkiModesFromUserRow(userRow) : null,
         };
+
+        await awardPoints(supabase, auth.user.id, POINTS.AI_TRANSFORM);
       }
     } catch {
       // best-effort: ignore profile lookup

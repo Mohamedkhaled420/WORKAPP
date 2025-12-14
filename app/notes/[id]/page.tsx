@@ -48,7 +48,7 @@ export default async function NotePage({
         <NoteEditor
           noteId={note.id}
           initialTitle={note.title}
-          initialContent={note.content as unknown as Content}
+          initialContent={(note.content ?? "") as unknown as Content}
         />
       </main>
     </div>

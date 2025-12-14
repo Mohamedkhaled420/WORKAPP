@@ -1,12 +1,14 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { MbtiLetter, MbtiScores, MbtiType } from "@/lib/mbti";
+import type { MbtiScores, MbtiType } from "@/lib/mbti";
 import type { MbtiChoice } from "@/lib/assessments/mbti";
 import type { TkiChoice, TkiMode, TkiScores } from "@/lib/tki";
 import { dominantTkiModesFromScores } from "@/lib/psychometrics";
+import { awardBadgeByName, awardPoints, POINTS } from "@/lib/gamification";
 
 export interface SaveOnboardingPayload {
+  role: string;
   mbti: {
     type: MbtiType;
     scores: MbtiScores;
@@ -40,18 +42,18 @@ export async function saveOnboarding(payload: SaveOnboardingPayload) {
       ? payload.tki.dominantModes
       : dominantTkiModesFromScores(payload.tki.scores);
 
+  const tkiDominant = dominantModes[0] ?? null;
+
   const { error: updateError } = await supabase
     .from("users")
     .update({
-      onboarding_step: 3,
+      onboarding_step: 6,
       onboarding_completed: true,
+      role: payload.role,
       mbti_type: payload.mbti.type,
-      mbti_dimensions: payload.mbti.scores as unknown as Record<MbtiLetter, number>,
-      tki_competing: payload.tki.scores.competing,
-      tki_collaborating: payload.tki.scores.collaborating,
-      tki_compromising: payload.tki.scores.compromising,
-      tki_avoiding: payload.tki.scores.avoiding,
-      tki_accommodating: payload.tki.scores.accommodating,
+      mbti_dimensions: payload.mbti.scores,
+      tki_scores: payload.tki.scores,
+      tki_dominant_mode: tkiDominant,
     })
     .eq("id", auth.user.id);
 
@@ -62,13 +64,13 @@ export async function saveOnboarding(payload: SaveOnboardingPayload) {
   const { error: assessmentError } = await supabase.from("assessments").insert([
     {
       user_id: auth.user.id,
-      type: "mbti",
+      assessment_type: "mbti",
       responses: payload.mbti.responses,
       result: { type: payload.mbti.type, scores: payload.mbti.scores },
     },
     {
       user_id: auth.user.id,
-      type: "tki",
+      assessment_type: "tki",
       responses: payload.tki.responses,
       result: { scores: payload.tki.scores, dominantModes },
     },
@@ -77,6 +79,10 @@ export async function saveOnboarding(payload: SaveOnboardingPayload) {
   if (assessmentError) {
     return { ok: false as const, error: assessmentError.message };
   }
+
+  await awardPoints(supabase, auth.user.id, POINTS.MBTI_COMPLETE);
+  await awardPoints(supabase, auth.user.id, POINTS.TKI_COMPLETE);
+  await awardBadgeByName(supabase, auth.user.id, "First Step");
 
   return { ok: true as const };
 }
