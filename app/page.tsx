@@ -21,7 +21,19 @@ export default function Home() {
             <Link href="/onboarding">Start onboarding</Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/docs">View technical docs</Link>
+            <Link href="/dashboard">Dashboard</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/learning-paths">Learning paths</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/notes">Notes</Link>
+          </Button>
+          <Button variant="ghost" asChild>
+            <Link href="/docs">Docs</Link>
+          </Button>
+          <Button variant="ghost" asChild>
+            <Link href="/login">Sign in</Link>
           </Button>
         </section>
 

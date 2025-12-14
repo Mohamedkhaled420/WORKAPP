@@ -89,10 +89,27 @@ execute function public.set_updated_at();
 
 create index if not exists learning_paths_user_id_idx on public.learning_paths (user_id);
 
+create table if not exists public.notes (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.users (id) on delete cascade,
+  title text not null default '',
+  content jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create trigger notes_set_updated_at
+before update on public.notes
+for each row
+execute function public.set_updated_at();
+
+create index if not exists notes_user_id_idx on public.notes (user_id);
+
 -- Basic RLS
 alter table public.users enable row level security;
 alter table public.assessments enable row level security;
 alter table public.learning_paths enable row level security;
+alter table public.notes enable row level security;
 
 -- Users can read/update their own profile
 drop policy if exists "Users can read own profile" on public.users;
@@ -143,6 +160,29 @@ with check (auth.uid() = user_id);
 drop policy if exists "Users can update own learning paths" on public.learning_paths;
 create policy "Users can update own learning paths"
 on public.learning_paths
+for update
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+-- Notes: CRUD per-user
+drop policy if exists "Users can read own notes" on public.notes;
+create policy "Users can read own notes"
+on public.notes
+for select
+to authenticated
+using (auth.uid() = user_id);
+
+drop policy if exists "Users can create own notes" on public.notes;
+create policy "Users can create own notes"
+on public.notes
+for insert
+to authenticated
+with check (auth.uid() = user_id);
+
+drop policy if exists "Users can update own notes" on public.notes;
+create policy "Users can update own notes"
+on public.notes
 for update
 to authenticated
 using (auth.uid() = user_id)
