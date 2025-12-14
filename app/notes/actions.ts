@@ -6,7 +6,11 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { awardPoints, maybeAwardNoteMaster, POINTS } from "@/lib/gamification";
 
 export async function createNote() {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !supabaseKey) {
     redirect("/notes?error=supabase_env_missing");
   }
 
@@ -37,7 +41,11 @@ export async function updateNote(
   noteId: string,
   payload: { title: string; content: string },
 ) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !supabaseKey) {
     return { ok: false as const, error: "Supabase env vars are not set." };
   }
 

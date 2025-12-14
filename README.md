@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The AI Work App
 
-## Getting Started
+A minimalist, Notion-style professional learning platform powered by:
 
-First, run the development server:
+- Next.js App Router + TypeScript
+- Supabase (Auth + Postgres)
+- Shadcn/UI + Tailwind
+- Vercel AI SDK (optional)
+- NewsAPI (optional)
+
+## Local setup
+
+### 1) Configure environment variables
+
+Copy `.env.example` to `.env.local` and fill in values:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` (or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`)
+- `SUPABASE_SERVICE_ROLE_KEY` (optional; enables server-side cache writes)
+- `OPENAI_API_KEY` (optional; enables higher-quality AI transforms)
+- `NEWSAPI_KEY` (optional; enables real AI news)
+
+Do **not** commit secrets.
+
+### 2) Set up Supabase schema + seed data
+
+Run these SQL files in the Supabase **SQL Editor** (in this order):
+
+1. `supabase/schema.sql`
+2. `supabase/seed.sql`
+
+This creates all core tables (users, assessments, courses_library, learning_paths, notes, badges, user_badges, ai_news_cache), RLS policies, and an RPC for the leaderboard.
+
+### 3) Configure Supabase Auth redirect URLs
+
+In Supabase → Authentication → URL Configuration:
+
+- **Site URL**: `http://localhost:3000`
+- **Redirect URLs**:
+  - `http://localhost:3000/auth/callback`
+  - (add your production URL too when deploying)
+
+Enable providers:
+
+- Email (OTP)
+- Google OAuth (optional)
+
+### 4) Run the app
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key routes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `/` Landing
+- `/onboarding` 3D liquid-glass onboarding (role + MBTI + TKI)
+- `/dashboard` Workspace + gamification + news carousel
+- `/learning-paths` Curated learning paths (from `courses_library`)
+- `/notes` Tiptap editor + AI highlight toolbar
+- `/dashboard/leaderboard` Leaderboard
+- `/dashboard/achievements` Badges
+- `/courses` Courses library
 
-## Learn More
+## Notes
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- If AI keys are missing, the app falls back to lightweight deterministic behavior.
+- If NewsAPI key is missing, the dashboard shows a fallback news item.
