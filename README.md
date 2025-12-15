@@ -65,6 +65,10 @@ Open http://localhost:3000
 - `/dashboard/achievements` Badges
 - `/courses` Courses library
 
+## Deployment
+
+Ready to deploy? See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for step-by-step instructions on deploying to Vercel.
+
 ## Notes
 
 - If AI keys are missing, the app falls back to lightweight deterministic behavior.
